@@ -204,7 +204,7 @@
     <div id="game-container">
       <div id="ui-bar" class="hidden">
         <span id="level-display">RM:1</span>
-        <span id="bean-display">BEANS:0/33</span>
+        <span id="bean-display">BEANS:0/24</span>
         <span id="life-display">☕☕☕☕☕</span>
       </div>
 
@@ -235,9 +235,9 @@
             HOW TO PLAY:
           </p>
           <p class="body-text" style="text-align: left; line-height: 1.5">
-            1. Help Jacky collect 33 beans.<br />2. Use D-Pad or Arrow Keys.<br />3.
-            Dodge cheesecakes, ensaymadas & baristas.<br />4. You have 5 Cups
-            (Lives).<br />5. Beware of the Boss!
+            1. Help Jacky collect 24 beans.<br />2. Use D-Pad or Arrow Keys.<br />3.
+            Dodge carts, cups & baristas.<br />4. You have 5 Cups (Lives).<br />5.
+            Beware of the Boss!
           </p>
           <button id="start-btn" class="pixel-btn">START GAME</button>
         </div>
@@ -254,11 +254,9 @@
 
       <!-- Win Screen -->
       <div id="win-screen" class="overlay hidden">
-        <div class="pixel-panel" style="width: 90%; max-width: 500px">
-          <h1
-            class="title-text"
-            style="color: #fde047; font-size: 20px; line-height: 1.5">
-            Happy Birthday<br />Ma'am Jack!
+        <div class="pixel-panel">
+          <h1 class="title-text" style="color: #fde047; font-size: 20px">
+            Happy Birday Jacky!
           </h1>
           <p
             class="body-text"
@@ -267,20 +265,15 @@
               color: #86efac;
               margin-bottom: 30px;
               line-height: 2;
-              text-align: center;
-              margin-left: auto;
-              margin-right: auto;
             ">
-            FROM ICLC FAMILY<br />and Coffee Buddies!
+            from ICLC FRIENDS<br />and Coffee buddies!
           </p>
-          <div style="display: flex; justify-content: center">
-            <button
-              id="exit-btn"
-              class="pixel-btn"
-              style="background-color: #991b1b; margin-top: 0">
-              EXIT GAME
-            </button>
-          </div>
+          <button
+            id="exit-btn"
+            class="pixel-btn"
+            style="background-color: #991b1b">
+            EXIT GAME
+          </button>
         </div>
       </div>
 
@@ -472,60 +465,56 @@
         6: '#d4af37', // Blonde hair
         7: '#8c593b', // Bean dark / wood
         8: '#aaaaaa', // Gray Cart / Bat
-        g: '#8bc34a', // Jacky's Green Clothes
-        v: '#8e24aa', // Boss Leah's Purple Clothes
+        9: '#ff6699', // Pink clothes
         a: '#87ceeb', // Glasses frame (Light Blue)
         b: '#333333', // Husband suit (Dark Gray)
         c: '#ff9900', // Candle flame
         p: '#2e8b57', // Plant green
-        e: '#fffdd0', // Cheesecake cream
-        f: '#e53935', // Cherry red
-        s: '#fbbf24', // Ensaymada cheese
         '.': 'transparent',
       };
 
-      // Jacky Sprite (Green clothes, Thick Black Glasses, Long Hair)
+      // Jacky Sprite
       const sprJacky = [
         '............',
         '...000000...',
         '..02222220..',
         '.0221111220.',
-        '.0000110000.', // Thick black upper frames
-        '.0550110550.', // Black outer frame with white glasses lenses
-        '.0222222220.', // Long hair flowing
-        '.020gggg020.', // Green clothes
-        '.020gggg020.', // Green clothes
+        '.0aa1111aa0.',
+        '.0a111111a0.',
+        '.0222222220.',
+        '.0209999020.',
+        '.0209999020.',
         '..02444420..',
         '...040040...',
         '...00..00...',
       ];
 
-      // BOSS LEAH Sprites (Bigger, Purple clothes, Swinging Bat Animation)
-      const sprLeah1 = [
+      // BOSS GWEN Sprites (Bigger, Pink clothes, Swinging Bat Animation)
+      const sprGwen1 = [
         '...000000.8.',
         '..022222208.',
         '.02211112208',
         '.02211112208',
-        '.020vvvv0208', // Bat held up + Purple
-        '.020vvvv0008',
-        '..00vvvv000.',
-        '.010vvvv080.',
-        '.000vvvv000.',
+        '.02099990208', // Bat held up
+        '.02099990008',
+        '..009999000.',
+        '.0109999080.',
+        '.0009999000.',
         '...044440...',
         '...00..00...',
         '............',
       ];
 
-      const sprLeah2 = [
+      const sprGwen2 = [
         '...000000...',
         '..02222220..',
         '.0221111220.',
         '.0221111220.',
-        '.020vvvv020.', // Purple
-        '.020vvvv000.',
-        '..00vvvv000.',
-        '.010vvvv000.',
-        '.000vvvv0888', // Bat swinging out horizontally
+        '.0209999020.',
+        '.0209999000.',
+        '..009999000.',
+        '.0109999000.',
+        '.00099990888', // Bat swinging out horizontally
         '...044440...',
         '...00..00...',
         '............',
@@ -546,32 +535,32 @@
         '............',
       ];
 
-      const sprCheesecake = [
+      const sprCart = [
+        '............',
+        '...000000...',
+        '..08888880..',
+        '.0888888880.',
+        '.0888888880.',
+        '.0000000000.',
+        '....0..0....',
+        '....0..0....',
         '............',
         '............',
-        '....0000....',
-        '...0ffff0...',
-        '..0eeeeee0..',
-        '.0eeeeeeee0.',
-        '.0eeeeeeee0.',
-        '.0eeeeeeee0.',
-        '.0777777770.',
-        '..00000000..',
         '............',
         '............',
       ];
 
-      const sprEnsaymada = [
+      const sprCup = [
+        '............',
         '............',
         '....0000....',
-        '..00ssss00..',
-        '.0ssssssss0.',
-        '.0s5s5s5ss0.',
-        '.0666666660.',
-        '.0666666660.',
-        '.0666666660.',
-        '..07777770..',
-        '...000000...',
+        '...055550...',
+        '..01111110..',
+        '..055555500.',
+        '...055550.0.',
+        '...0333300..',
+        '....0000....',
+        '............',
         '............',
         '............',
       ];
@@ -757,11 +746,11 @@
           intro: [
             {
               name: 'Jacky',
-              text: 'Welcome to Starbucks Roosevelt! I need to collect the 11 coffee beans scattered outside first.',
+              text: 'Ah, the coffee shop! I need to collect the 8 coffee beans scattered outside first.',
             },
             {
               name: 'Jacky',
-              text: 'I better watch out for those wild cheesecakes!',
+              text: 'I better watch out for those sliding shopping carts!',
             },
           ],
           startX: 50,
@@ -775,10 +764,6 @@
             { x: 250, y: 300 },
             { x: 350, y: 300 },
             { x: 450, y: 300 },
-            // 3 additional beans
-            { x: 250, y: 200 },
-            { x: 300, y: 200 },
-            { x: 350, y: 200 },
           ],
           obstacles: [
             {
@@ -788,7 +773,7 @@
               dx: 0,
               dy: 0,
               speed: 1.2,
-              sprite: sprCheesecake,
+              sprite: sprCart,
               type: 'random',
               timer: 0,
               minX: 20,
@@ -804,7 +789,7 @@
               dx: 0,
               dy: 0,
               speed: 1.2,
-              sprite: sprCheesecake,
+              sprite: sprCart,
               type: 'random',
               timer: 0,
               minX: 20,
@@ -835,7 +820,7 @@
             },
             {
               name: 'Jacky',
-              text: 'Those wild ensaymadas look dangerous. Better dodge them.',
+              text: 'Those giant hot coffee cups look dangerous. Better dodge them.',
             },
           ],
           startX: 50,
@@ -849,10 +834,6 @@
             { x: 200, y: 350 },
             { x: 300, y: 350 },
             { x: 400, y: 350 },
-            // 3 additional beans
-            { x: 100, y: 200 },
-            { x: 350, y: 200 },
-            { x: 500, y: 150 },
           ],
           obstacles: [
             {
@@ -862,7 +843,7 @@
               dx: 0,
               dy: 0,
               speed: 1.5,
-              sprite: sprEnsaymada,
+              sprite: sprCup,
               type: 'random',
               timer: 0,
               minX: 50,
@@ -878,7 +859,7 @@
               dx: 0,
               dy: 0,
               speed: 1.5,
-              sprite: sprEnsaymada,
+              sprite: sprCup,
               type: 'random',
               timer: 0,
               minX: 50,
@@ -921,10 +902,6 @@
             { x: 250, y: 300 },
             { x: 350, y: 300 },
             { x: 450, y: 300 },
-            // 3 additional beans
-            { x: 50, y: 150 },
-            { x: 500, y: 150 },
-            { x: 50, y: 250 },
           ],
           obstacles: [
             {
@@ -1083,21 +1060,18 @@
       }
 
       function updateUI() {
-        beanDisplay.innerText = `BEANS:${totalBeansCollected}/33`;
+        beanDisplay.innerText = `BEANS:${totalBeansCollected}/24`;
         lifeDisplay.innerText = '☕'.repeat(lives > 0 ? lives : 0);
       }
 
       // Input Handling
       window.addEventListener('keydown', (e) => {
-        // Convert to lowercase so WASD works even if Caps Lock is on
-        const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-        if (keys.hasOwnProperty(k)) keys[k] = true;
-        if (gameState === 'DIALOG' && (k === ' ' || k === 'Enter'))
+        if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+        if (gameState === 'DIALOG' && (e.key === ' ' || e.key === 'Enter'))
           handleDialogAdvance(e);
       });
       window.addEventListener('keyup', (e) => {
-        const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-        if (keys.hasOwnProperty(k)) keys[k] = false;
+        if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
       });
 
       // MOBILE CONTROLS UPDATED: Using Pointer Events for 100% smooth holds without stuttering
@@ -1157,25 +1131,9 @@
           loadLevel(currentLevel);
         });
 
-      // Reliable close function
-      function closeGame() {
-        try {
-          window.close();
-        } catch (e) {}
-
-        // If window.close is blocked by the browser, show a clean message over everything
-        document.body.innerHTML = `
-          <div style='display:flex; height:100vh; width:100vw; justify-content:center; align-items:center; background:#1a1a1a; color:#4ade80; font-family:"Press Start 2P", cursive; text-align:center; padding: 20px; line-height: 1.8; flex-direction: column;'>
-            <h1>THANK YOU FOR PLAYING!</h1>
-            <p style='color:#fff; font-size: 12px; margin-top: 30px;'>You may now close this browser tab.</p>
-          </div>
-        `;
-      }
-
-      document.getElementById('exit-btn').addEventListener('click', closeGame);
-      document
-        .getElementById('game-over-exit-btn')
-        .addEventListener('click', closeGame);
+      document.getElementById('exit-btn').addEventListener('click', () => {
+        window.location.reload();
+      });
 
       document.getElementById('try-again-btn').addEventListener('click', () => {
         gameOverScreen.classList.add('hidden');
@@ -1187,6 +1145,12 @@
         loadLevel(currentLevel);
         gameState = 'PLAYING';
       });
+
+      document
+        .getElementById('game-over-exit-btn')
+        .addEventListener('click', () => {
+          window.location.reload();
+        });
 
       // Precise Box Collision using Hitboxes
       function checkCollision(obj1, obj2) {
@@ -1283,19 +1247,18 @@
               // Animate the bat swing
               obs.animTimer = (obs.animTimer || 0) + 1;
               if (obs.animTimer % 30 < 15) {
-                obs.sprite = sprLeah1;
+                obs.sprite = sprGwen1;
               } else {
-                obs.sprite = sprLeah2;
+                obs.sprite = sprGwen2;
               }
 
               // Boss Dialog Logic
               obs.bossTextTimer = (obs.bossTextTimer || 0) - 1;
               if (obs.bossTextTimer <= 0) {
                 const phrases = [
-                  ['halika ditoo', 'maam jaacck!'],
-                  ['andyan nako takbo!'],
-                  ['papaluin na kita'],
-                  ['penge ng kapeee!'],
+                  ['wala pa akong tulog,', 'halika dito maam jaack!'],
+                  ['nag iisip pa ako ng', 'mga gagawin sa', 'camp raaawrr!'],
+                  ['halika dito!'],
                 ];
                 obs.currentBossText =
                   phrases[Math.floor(Math.random() * phrases.length)];
@@ -1388,7 +1351,7 @@
           }
         }
 
-        // BOSS LEAH Trigger (Room 3, exactly 3 beans left uncollected out of 11 total for this room)
+        // BOSS GWEN Trigger (Room 3, exactly 3 beans left uncollected)
         if (
           currentLevel === 2 &&
           uncollectedCount <= 3 &&
@@ -1398,7 +1361,7 @@
           bossSpawned = true;
           // Remove other wandering enemies
           obstacles = obstacles.filter((o) => o.type === 'static_counter');
-          // Spawn Boss Leah (slower speed, with animation timer)
+          // Spawn Boss Gwen (slower speed, with animation timer)
           obstacles.push({
             x: 250,
             y: 50,
@@ -1406,7 +1369,7 @@
             dx: 0,
             dy: 0,
             speed: 0.7,
-            sprite: sprLeah1,
+            sprite: sprGwen1,
             animTimer: 0,
             type: 'boss_chase',
             timer: 0,
@@ -1430,7 +1393,7 @@
           startDialog([
             {
               name: 'WARNING',
-              text: 'Warning! BOSS LEAH IS HERE, MAG INGAT IKAW SA BUHAY MO PO MAAM JACK, OPO, KASI WALA PA AKONG TULOOG.',
+              text: 'warning! BOSS GWEN is Here! galit yan kasi wala pang tulog be careful maam Jack!',
             },
           ]);
           return;
