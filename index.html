@@ -37,7 +37,7 @@
         box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5);
         image-rendering: pixelated;
         max-width: 95%;
-        max-height: 55vh; /* Adjusted slightly to make room for bigger d-pad */
+        max-height: 50vh; /* Adjusted slightly to make room for bigger d-pad */
       }
 
       /* Pixel Art UI Styles */
@@ -66,14 +66,17 @@
         box-shadow: 0px 0px 0px #000;
       }
 
-      /* Mobile D-Pad Styles - MADE BIGGER FOR BETTER MOBILE PLAY */
+      /* Mobile D-Pad Styles - ENLARGED AND FIXED ARROWS */
       #dpad {
         display: grid;
-        grid-template-columns: repeat(3, 80px); /* Increased size */
-        grid-template-rows: repeat(3, 80px); /* Increased size */
-        gap: 10px;
+        grid-template-columns: repeat(
+          3,
+          90px
+        ); /* Increased size for mobile accessibility */
+        grid-template-rows: repeat(3, 90px);
+        gap: 12px;
         margin-top: 20px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
       }
       .dpad-btn {
         background-color: #d4b895;
@@ -82,13 +85,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 32px; /* Bigger Arrows */
-        color: #000;
         user-select: none;
         -webkit-user-select: none;
         cursor: pointer;
         z-index: 10;
         touch-action: none;
+        position: relative;
       }
       .dpad-btn:active,
       .dpad-btn.active {
@@ -96,6 +98,37 @@
         box-shadow: 0px 0px 0px #000;
         background-color: #b09676;
       }
+
+      /* Custom black triangular arrows to prevent iOS Emoji rendering */
+      .arrow-up {
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-bottom: 25px solid black;
+      }
+      .arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 25px solid black;
+      }
+      .arrow-left {
+        width: 0;
+        height: 0;
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+        border-right: 25px solid black;
+      }
+      .arrow-right {
+        width: 0;
+        height: 0;
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+        border-left: 25px solid black;
+      }
+
       #btn-up {
         grid-column: 2;
         grid-row: 1;
@@ -130,17 +163,29 @@
         display: none !important;
       }
 
+      /* UI Bar forced horizontal layout */
       #ui-bar {
         position: absolute;
         top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        width: 100%;
         display: flex;
-        gap: 20px;
+        flex-direction: row; /* Horizontal */
+        flex-wrap: nowrap; /* No wrapping to vertical */
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
         z-index: 5;
-        font-size: 10px;
+        font-size: 9px; /* Slightly smaller to fit everything on one line */
         color: white;
         text-shadow: 2px 2px 0px #000;
+        padding: 0 5px;
+      }
+
+      #life-container {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
       }
 
       .title-text {
@@ -203,9 +248,12 @@
   <body>
     <div id="game-container">
       <div id="ui-bar" class="hidden">
-        <span id="level-display">RM:1</span>
-        <span id="bean-display">BEANS:0/33</span>
-        <span id="life-display">☕☕☕☕☕</span>
+        <span id="level-display">RM: 1</span>
+        <span id="bean-display">BEANS: 0/33</span>
+        <div id="life-container">
+          <span>LIFE: </span>
+          <span id="life-display">☕☕☕☕☕</span>
+        </div>
       </div>
 
       <canvas id="gameCanvas" width="600" height="400"></canvas>
@@ -219,16 +267,18 @@
 
       <!-- Mobile Controls -->
       <div id="dpad">
-        <div class="dpad-btn" id="btn-up">▲</div>
-        <div class="dpad-btn" id="btn-left">◀</div>
-        <div class="dpad-btn" id="btn-right">▶</div>
-        <div class="dpad-btn" id="btn-down">▼</div>
+        <div class="dpad-btn" id="btn-up"><div class="arrow-up"></div></div>
+        <div class="dpad-btn" id="btn-left"><div class="arrow-left"></div></div>
+        <div class="dpad-btn" id="btn-right">
+          <div class="arrow-right"></div>
+        </div>
+        <div class="dpad-btn" id="btn-down"><div class="arrow-down"></div></div>
       </div>
 
       <!-- Start Screen -->
       <div id="start-screen" class="overlay">
         <div class="pixel-panel">
-          <h1 class="title-text">JACKY'S<br />COFFEE RUN V 1.1</h1>
+          <h1 class="title-text">JACKY'S<br />COFFEE RUN <br />V1.2</h1>
           <p
             class="body-text"
             style="
@@ -1297,7 +1347,7 @@
           hitbox: { xOffset: 0, yOffset: 0, w: 48, h: 48 },
         }));
 
-        levelDisplay.innerText = `RM:${levelIndex + 1}`;
+        levelDisplay.innerText = `RM: ${levelIndex + 1}`;
         updateUI();
 
         // Start level intro dialog
@@ -1316,7 +1366,7 @@
       }
 
       function updateUI() {
-        beanDisplay.innerText = `BEANS:${totalBeansCollected}/33`;
+        beanDisplay.innerText = `BEANS: ${totalBeansCollected}/33`;
         lifeDisplay.innerText = '☕'.repeat(lives > 0 ? lives : 0);
       }
 
