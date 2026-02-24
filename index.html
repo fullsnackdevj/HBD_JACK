@@ -16,8 +16,10 @@
         overflow: hidden;
         background-color: #1a1a1a;
         font-family: 'Press Start 2P', cursive;
-        touch-action: none;
+        touch-action: none; /* Prevents unwanted zooming/scrolling on mobile */
         color: white;
+        user-select: none;
+        -webkit-user-select: none;
       }
       #game-container {
         position: relative;
@@ -35,7 +37,7 @@
         box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.5);
         image-rendering: pixelated;
         max-width: 95%;
-        max-height: 60vh;
+        max-height: 55vh; /* Adjusted slightly to make room for bigger d-pad */
       }
 
       /* Pixel Art UI Styles */
@@ -64,13 +66,14 @@
         box-shadow: 0px 0px 0px #000;
       }
 
-      /* Mobile D-Pad Styles */
+      /* Mobile D-Pad Styles - MADE BIGGER FOR BETTER MOBILE PLAY */
       #dpad {
         display: grid;
-        grid-template-columns: repeat(3, 60px);
-        grid-template-rows: repeat(3, 60px);
-        gap: 5px;
-        margin-top: 15px;
+        grid-template-columns: repeat(3, 80px); /* Increased size */
+        grid-template-rows: repeat(3, 80px); /* Increased size */
+        gap: 10px;
+        margin-top: 20px;
+        margin-bottom: 20px;
       }
       .dpad-btn {
         background-color: #d4b895;
@@ -79,11 +82,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 32px; /* Bigger Arrows */
         color: #000;
         user-select: none;
+        -webkit-user-select: none;
         cursor: pointer;
         z-index: 10;
+        touch-action: none;
       }
       .dpad-btn:active,
       .dpad-btn.active {
@@ -131,9 +136,9 @@
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        gap: 30px;
+        gap: 20px;
         z-index: 5;
-        font-size: 12px;
+        font-size: 10px;
         color: white;
         text-shadow: 2px 2px 0px #000;
       }
@@ -322,6 +327,89 @@
         ArrowRight: false,
       };
 
+      // --- AUDIO / MUSIC SYSTEM (Web Audio API) ---
+      let audioCtx;
+      let bgmInterval;
+      let noteIndex = 0;
+
+      function initAudio() {
+        if (!audioCtx)
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      }
+
+      function playNote(freq, type, duration, vol) {
+        if (!audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioCtx.currentTime + duration,
+          );
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {}
+      }
+
+      function startNormalMusic() {
+        initAudio();
+        if (bgmInterval) clearInterval(bgmInterval);
+        noteIndex = 0;
+        // Happy, upbeat 8-bit chip-tune sequence
+        bgmInterval = setInterval(() => {
+          if (gameState !== 'PLAYING' && gameState !== 'DIALOG') return;
+          const notes = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63]; // C4, E4, G4, C5, G4, E4
+          playNote(notes[noteIndex % notes.length], 'square', 0.15, 0.02);
+          noteIndex++;
+        }, 200);
+      }
+
+      function startBossMusic() {
+        initAudio();
+        if (bgmInterval) clearInterval(bgmInterval);
+        noteIndex = 0;
+        // Scary, slow, dissonant low rumble
+        bgmInterval = setInterval(() => {
+          if (gameState !== 'PLAYING' && gameState !== 'DIALOG') return;
+          const notes = [65.41, 69.3]; // Low C, C#
+          playNote(notes[noteIndex % notes.length], 'sawtooth', 0.6, 0.06);
+          noteIndex++;
+        }, 600);
+      }
+
+      function startHappyMusic() {
+        initAudio();
+        if (bgmInterval) clearInterval(bgmInterval);
+        noteIndex = 0;
+        // Joyful, happy melody for the VIP room
+        bgmInterval = setInterval(() => {
+          if (
+            gameState !== 'PLAYING' &&
+            gameState !== 'DIALOG' &&
+            gameState !== 'WIN'
+          )
+            return;
+          const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25]; // C5 E5 G5 C6 G5 E5
+          playNote(notes[noteIndex % notes.length], 'sine', 0.15, 0.03);
+          noteIndex++;
+        }, 180);
+      }
+
+      function stopMusic() {
+        if (bgmInterval) clearInterval(bgmInterval);
+      }
+
+      function playDamageSound() {
+        initAudio();
+        playNote(150, 'sawtooth', 0.3, 0.05); // Zap sound
+      }
+
       // --- DIALOG SYSTEM ---
       let dialogQueue = [];
       let onDialogComplete = null;
@@ -364,12 +452,7 @@
       };
       document
         .getElementById('game-container')
-        .addEventListener('mousedown', handleDialogAdvance);
-      document
-        .getElementById('game-container')
-        .addEventListener('touchstart', handleDialogAdvance, {
-          passive: false,
-        });
+        .addEventListener('pointerdown', handleDialogAdvance);
 
       // --- PIXEL ART ENGINE ---
       const colors = {
@@ -827,7 +910,7 @@
               size: 48,
               dx: 0,
               dy: 0,
-              speed: 1.5,
+              speed: 0.9,
               sprite: sprBarista,
               type: 'random',
               timer: 0,
@@ -843,7 +926,7 @@
               size: 48,
               dx: 0,
               dy: 0,
-              speed: 1.5,
+              speed: 0.9,
               sprite: sprBarista,
               type: 'random',
               timer: 0,
@@ -859,7 +942,7 @@
               size: 48,
               dx: 0,
               dy: 0,
-              speed: 1.5,
+              speed: 0.9,
               sprite: sprBarista,
               type: 'random',
               timer: 0,
@@ -933,7 +1016,12 @@
           collected: false,
           hitbox: { xOffset: 0, yOffset: 0, w: 24, h: 24 },
         }));
-        obstacles = lvl.obstacles.map((o) => ({ ...o }));
+        obstacles = lvl.obstacles.map((o) => ({
+          ...o,
+          opacity: 1.0,
+          fading: false,
+          dead: false,
+        }));
 
         // Add hitboxes to scenery for collision blocking
         scenery = lvl.scenery
@@ -960,6 +1048,15 @@
         if (lvl.intro && lvl.intro.length > 0) {
           startDialog(lvl.intro, null);
         }
+
+        // Restart normal music if loading a level and boss hasn't spawned
+        if (gameState !== 'START') {
+          if (levelIndex === 3) {
+            startHappyMusic();
+          } else if (!bossSpawned) {
+            startNormalMusic();
+          }
+        }
       }
 
       function updateUI() {
@@ -977,6 +1074,7 @@
         if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
       });
 
+      // MOBILE CONTROLS UPDATED: Using Pointer Events for 100% smooth holds without stuttering
       const setupDpad = (btnId, keyName1, keyName2) => {
         const btn = document.getElementById(btnId);
         const press = (e) => {
@@ -995,11 +1093,17 @@
           keys[keyName2] = false;
           btn.classList.remove('active');
         };
-        btn.addEventListener('touchstart', press, { passive: false });
-        btn.addEventListener('touchend', release);
-        btn.addEventListener('mousedown', press);
-        btn.addEventListener('mouseup', release);
-        btn.addEventListener('mouseleave', release);
+
+        // Pointer events are the modern standard to fix touch + mouse stutter issues
+        btn.addEventListener('pointerdown', press);
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointerleave', release);
+        btn.addEventListener('pointercancel', release);
+
+        // Prevent default touch actions (like scrolling) strictly on the buttons
+        btn.addEventListener('touchstart', (e) => e.preventDefault(), {
+          passive: false,
+        });
       };
 
       setupDpad('btn-up', 'w', 'ArrowUp');
@@ -1128,6 +1232,11 @@
         for (let obs of obstacles) {
           if (obs.type === 'static_counter') continue;
 
+          if (obs.fading) {
+            obs.opacity -= 0.02;
+            if (obs.opacity <= 0) obs.dead = true;
+          }
+
           if (obs.type === 'random' || obs.type === 'boss_chase') {
             if (obs.type === 'boss_chase') {
               // Boss chases the player
@@ -1178,13 +1287,17 @@
           if (
             checkCollision(player, obs) &&
             !player.isHit &&
-            !player.invincible
+            !player.invincible &&
+            !obs.fading &&
+            !obs.dead
           ) {
             player.isHit = true;
             lives--;
             updateUI();
+            playDamageSound();
 
             if (lives <= 0) {
+              stopMusic();
               startDialog(
                 [
                   {
@@ -1199,14 +1312,12 @@
                 },
               );
             } else {
-              // Main Character "Ouch!" Dialog
+              // Main Character Random "Ouch!" Dialog
+              const hitPhrases = ['aray!', 'Jusko, sakit.', 'ano na?'];
+              const randomHit =
+                hitPhrases[Math.floor(Math.random() * hitPhrases.length)];
               startDialog(
-                [
-                  {
-                    name: 'Jacky',
-                    text: `Ouch! I lost a cup! (${lives} left)`,
-                  },
-                ],
+                [{ name: 'Jacky', text: `${randomHit} (${lives} left)` }],
                 () => {
                   // Respawn player at the start of the current room without resetting the room
                   player.x = levels[currentLevel].startX;
@@ -1220,6 +1331,9 @@
             return; // Stop updating frame
           }
         }
+
+        // Clean up dead obstacles
+        obstacles = obstacles.filter((o) => !o.dead);
 
         let levelComplete = true;
         let uncollectedCount = 0;
@@ -1238,7 +1352,12 @@
         }
 
         // BOSS GWEN Trigger (Room 3, exactly 3 beans left uncollected)
-        if (currentLevel === 2 && uncollectedCount === 3 && !bossSpawned) {
+        if (
+          currentLevel === 2 &&
+          uncollectedCount <= 3 &&
+          !bossSpawned &&
+          !player.exitActive
+        ) {
           bossSpawned = true;
           // Remove other wandering enemies
           obstacles = obstacles.filter((o) => o.type === 'static_counter');
@@ -1260,9 +1379,16 @@
             maxY: 350,
             hitbox: { xOffset: 16, yOffset: 16, w: 40, h: 40 },
             bossTextTimer: 0,
+            opacity: 1.0,
+            fading: false,
+            dead: false,
           });
           // Trigger earthquake screen shake
           screenShake = 25;
+
+          // Switch to Scary Boss Music
+          startBossMusic();
+
           // Show Boss Warning
           startDialog([
             {
@@ -1276,6 +1402,12 @@
         if (levelComplete && beans.length > 0 && currentLevel < 3) {
           if (!player.exitActive) {
             player.exitActive = true;
+
+            // Trigger slow death/fading for all moving enemies and boss
+            obstacles.forEach((o) => {
+              if (o.type !== 'static_counter') o.fading = true;
+            });
+
             startDialog([
               {
                 name: 'Jacky',
@@ -1310,6 +1442,7 @@
 
           if (checkCollision(player, friendTriggerBox)) {
             // Start ending dialog sequence
+            stopMusic();
             startDialog(
               [
                 {
@@ -1387,6 +1520,9 @@
           if (!bean.collected) drawSprite(sprBean, bean.x, bean.y, bean.size);
         for (let obs of obstacles) {
           if (obs.type !== 'static_counter') {
+            if (obs.opacity !== undefined)
+              ctx.globalAlpha = Math.max(0, obs.opacity);
+
             let flipObstacle = obs.dx < 0;
             drawSprite(obs.sprite, obs.x, obs.y, obs.size, flipObstacle);
 
@@ -1426,6 +1562,7 @@
                 );
               }
             }
+            ctx.globalAlpha = 1.0; // Reset global alpha for next items
           }
         }
 
