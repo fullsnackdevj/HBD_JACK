@@ -228,13 +228,18 @@
       <!-- Start Screen -->
       <div id="start-screen" class="overlay">
         <div class="pixel-panel">
-          <h1 class="title-text">JACKY'S<br />COFFEE RUN</h1>
+          <h1 class="title-text">JACKY'S<br />COFFEE RUN V 1.1</h1>
           <p
             class="body-text"
-            style="font-size: 12px; margin-bottom: 10px; color: #fde047">
+            style="
+              font-size: 12px;
+              margin-bottom: 10px;
+              color: #fde047;
+              text-align: center;
+            ">
             HOW TO PLAY:
           </p>
-          <p class="body-text" style="text-align: left; line-height: 1.5">
+          <p class="body-text" style="text-align: center; line-height: 1.5">
             1. Help Jacky collect 33 beans.<br />2. Use D-Pad or Arrow Keys.<br />3.
             Dodge cheesecakes, ensaymadas & baristas.<br />4. You have 5 Cups
             (Lives).<br />5. Beware of the Boss!
@@ -484,8 +489,8 @@
         '.': 'transparent',
       };
 
-      // Jacky Sprite (Green clothes, Thick Black Glasses, Long Hair)
-      const sprJacky = [
+      // Jacky Sprites (Directional)
+      const sprJackyDown = [
         '............',
         '...000000...',
         '..02222220..',
@@ -500,8 +505,38 @@
         '...00..00...',
       ];
 
-      // BOSS LEAH Sprites (Bigger, Purple clothes, Swinging Bat Animation)
-      const sprLeah1 = [
+      const sprJackyUp = [
+        '............',
+        '...000000...',
+        '..02222220..',
+        '.0222222220.',
+        '.0222222220.',
+        '.0222222220.',
+        '.0222222220.',
+        '.020gggg020.',
+        '.020gggg020.',
+        '..02444420..',
+        '...040040...',
+        '...00..00...',
+      ];
+
+      const sprJackySide = [
+        '............',
+        '...000000...',
+        '..02222220..',
+        '.022211110..',
+        '.020000100..', // side glasses frame
+        '.020550150..', // side lenses
+        '.022222220..',
+        '.020gggg0...',
+        '.020gggg0...',
+        '..0244440...',
+        '...04000....',
+        '...00.......',
+      ];
+
+      // BOSS LEAH Sprites (Directional)
+      const sprLeahDown1 = [
         '...000000.8.',
         '..022222208.',
         '.02211112208',
@@ -515,19 +550,118 @@
         '...00..00...',
         '............',
       ];
-
-      const sprLeah2 = [
+      const sprLeahDown2 = [
         '...000000...',
         '..02222220..',
         '.0221111220.',
         '.0221111220.',
-        '.020vvvv020.', // Purple
+        '.020vvvv020.',
         '.020vvvv000.',
         '..00vvvv000.',
         '.010vvvv000.',
         '.000vvvv0888', // Bat swinging out horizontally
         '...044440...',
         '...00..00...',
+        '............',
+      ];
+      const sprLeahUp1 = [
+        '...000000.8.',
+        '..022222208.',
+        '.02222222208',
+        '.02222222208',
+        '.020vvvv0208',
+        '.020vvvv0008',
+        '..00vvvv000.',
+        '..00vvvv000.',
+        '.000vvvv000.',
+        '...044440...',
+        '...00..00...',
+        '............',
+      ];
+      const sprLeahUp2 = [
+        '...000000...',
+        '..02222220..',
+        '.0222222220.',
+        '.0222222220.',
+        '.020vvvv020.',
+        '.020vvvv000.',
+        '..00vvvv000.',
+        '..00vvvv000.',
+        '.000vvvv0888',
+        '...044440...',
+        '...00..00...',
+        '............',
+      ];
+      const sprLeahSide1 = [
+        '.....000000.8',
+        '....022222208',
+        '...0222111108',
+        '...0200001008',
+        '...020vvvv008', // Bat side
+        '...020vvvv008',
+        '....00vvvv00.',
+        '....010vvvv0.',
+        '....000vvvv0.',
+        '.....044440..',
+        '......00..0..',
+        '.............',
+      ];
+      const sprLeahSide2 = [
+        '.....000000..',
+        '....02222220.',
+        '...022211110.',
+        '...020000100.',
+        '...020vvvv00.',
+        '...020vvvv00.',
+        '....00vvvv00.',
+        '....010vvvv0.',
+        '....000vvvv0888', // Bat swing
+        '.....044440..',
+        '......00..0..',
+        '.............',
+      ];
+
+      // Barista Sprites (Directional)
+      const sprBaristaDown = [
+        '...000000...',
+        '..03333330..',
+        '..00333300..',
+        '...011110...',
+        '...010010...',
+        '...011110...',
+        '..00055000..',
+        '.0103333010.',
+        '.0003333000.',
+        '...044440...',
+        '...00..00...',
+        '............',
+      ];
+      const sprBaristaUp = [
+        '...000000...',
+        '..03333330..',
+        '..00333300..',
+        '...022220...',
+        '...022220...',
+        '...022220...',
+        '..00055000..',
+        '.0003333000.',
+        '.0003333000.',
+        '...044440...',
+        '...00..00...',
+        '............',
+      ];
+      const sprBaristaSide = [
+        '.....000000.',
+        '....03333330',
+        '....00333300',
+        '.....011110.',
+        '.....010000.',
+        '.....011110.',
+        '....0005500.',
+        '...01033330.',
+        '...00033330.',
+        '....0044440.',
+        '.....00..0..',
         '............',
       ];
 
@@ -573,21 +707,6 @@
         '..07777770..',
         '...000000...',
         '............',
-        '............',
-      ];
-
-      const sprBarista = [
-        '...000000...',
-        '..03333330..',
-        '..00333300..',
-        '...011110...',
-        '...010010...',
-        '...011110...',
-        '..00055000..',
-        '.0103333010.',
-        '.0003333000.',
-        '...044440...',
-        '...00..00...',
         '............',
       ];
 
@@ -730,6 +849,14 @@
         }
       }
 
+      function drawSpriteRotated(spriteArray, x, y, size, angle) {
+        ctx.save();
+        ctx.translate(x + size / 2, y + size / 2);
+        ctx.rotate(angle);
+        drawSprite(spriteArray, -size / 2, -size / 2, size, false);
+        ctx.restore();
+      }
+
       // --- GAME ENTITIES & LOGIC ---
 
       const player = {
@@ -737,8 +864,7 @@
         y: 200,
         size: 48,
         speed: 4,
-        sprite: sprJacky,
-        facingRight: true,
+        direction: 'down',
         hitbox: { xOffset: 12, yOffset: 16, w: 24, h: 24 },
         isHit: false,
         exitActive: false,
@@ -766,6 +892,7 @@
           ],
           startX: 50,
           startY: 200,
+          exit: { x: 552, y: 176, type: 'right' },
           beans: [
             { x: 150, y: 100 },
             { x: 250, y: 100 },
@@ -813,6 +940,55 @@
               maxY: 350,
               hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
             },
+            // Added more enemies
+            {
+              x: 300,
+              y: 150,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.0,
+              sprite: sprCheesecake,
+              type: 'random',
+              timer: 0,
+              minX: 20,
+              maxX: 550,
+              minY: 20,
+              maxY: 350,
+              hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
+            },
+            {
+              x: 500,
+              y: 100,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.3,
+              sprite: sprCheesecake,
+              type: 'random',
+              timer: 0,
+              minX: 20,
+              maxX: 550,
+              minY: 20,
+              maxY: 350,
+              hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
+            },
+            {
+              x: 100,
+              y: 250,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.1,
+              sprite: sprCheesecake,
+              type: 'random',
+              timer: 0,
+              minX: 20,
+              maxX: 550,
+              minY: 20,
+              maxY: 350,
+              hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
+            },
           ],
           scenery: [
             { x: 20, y: 20, size: 48, sprite: sprPlant },
@@ -840,6 +1016,7 @@
           ],
           startX: 50,
           startY: 200,
+          exit: { x: 276, y: 352, type: 'bottom' },
           beans: [
             { x: 100, y: 50 },
             { x: 200, y: 50 },
@@ -887,6 +1064,55 @@
               maxY: 350,
               hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
             },
+            // Added more enemies
+            {
+              x: 300,
+              y: 50,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.3,
+              sprite: sprEnsaymada,
+              type: 'random',
+              timer: 0,
+              minX: 50,
+              maxX: 500,
+              minY: 50,
+              maxY: 350,
+              hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
+            },
+            {
+              x: 400,
+              y: 100,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.4,
+              sprite: sprEnsaymada,
+              type: 'random',
+              timer: 0,
+              minX: 50,
+              maxX: 500,
+              minY: 50,
+              maxY: 350,
+              hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
+            },
+            {
+              x: 200,
+              y: 300,
+              size: 48,
+              dx: 0,
+              dy: 0,
+              speed: 1.2,
+              sprite: sprEnsaymada,
+              type: 'random',
+              timer: 0,
+              minX: 50,
+              maxX: 500,
+              minY: 50,
+              maxY: 350,
+              hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
+            },
           ],
           scenery: [
             { x: 250, y: 150, size: 48, sprite: sprTable },
@@ -910,8 +1136,9 @@
               text: "The baristas are walking around randomly making orders. Let's take it slow.",
             },
           ],
-          startX: 50,
-          startY: 200,
+          startX: 276,
+          startY: 80,
+          exit: { x: 276, y: 0, type: 'top' },
           beans: [
             { x: 150, y: 50 },
             { x: 250, y: 50 },
@@ -934,7 +1161,7 @@
               dx: 0,
               dy: 0,
               speed: 0.9,
-              sprite: sprBarista,
+              sprite: sprBaristaDown,
               type: 'random',
               timer: 0,
               minX: 50,
@@ -950,7 +1177,7 @@
               dx: 0,
               dy: 0,
               speed: 0.9,
-              sprite: sprBarista,
+              sprite: sprBaristaDown,
               type: 'random',
               timer: 0,
               minX: 50,
@@ -966,7 +1193,7 @@
               dx: 0,
               dy: 0,
               speed: 0.9,
-              sprite: sprBarista,
+              sprite: sprBaristaDown,
               type: 'random',
               timer: 0,
               minX: 50,
@@ -988,8 +1215,8 @@
           scenery: [
             { x: 30, y: 20, size: 48, sprite: sprPlant },
             { x: 520, y: 320, size: 48, sprite: sprPlant },
-            { x: 300, y: 40, size: 48, sprite: sprTable },
-            { x: 300, y: 0, size: 48, sprite: sprChair },
+            { x: 500, y: 220, size: 48, sprite: sprTable },
+            { x: 500, y: 260, size: 48, sprite: sprChair },
           ],
           friends: [],
         },
@@ -997,9 +1224,13 @@
           name: 'VIP Room',
           intro: [
             { name: 'Jacky', text: "Wait... the VIP room? Who's in here?" },
+            {
+              name: 'Jacky',
+              text: 'I need to come closer to the people to talk...',
+            },
           ],
-          startX: 50,
-          startY: 200,
+          startX: 276,
+          startY: 330,
           beans: [],
           obstacles: [],
           scenery: [
@@ -1027,6 +1258,7 @@
         const lvl = levels[levelIndex];
         player.x = lvl.startX;
         player.y = lvl.startY;
+        player.direction = 'down';
         player.isHit = false;
         player.exitActive = false;
         player.invincible = false;
@@ -1044,6 +1276,7 @@
           opacity: 1.0,
           fading: false,
           dead: false,
+          direction: 'down',
         }));
 
         // Add hitboxes to scenery for collision blocking
@@ -1224,14 +1457,14 @@
           dy = 0;
         if (keys.w || keys.ArrowUp) dy -= player.speed;
         if (keys.s || keys.ArrowDown) dy += player.speed;
-        if (keys.a || keys.ArrowLeft) {
-          dx -= player.speed;
-          player.facingRight = false;
-        }
-        if (keys.d || keys.ArrowRight) {
-          dx += player.speed;
-          player.facingRight = true;
-        }
+        if (keys.a || keys.ArrowLeft) dx -= player.speed;
+        if (keys.d || keys.ArrowRight) dx += player.speed;
+
+        // Player Direction State
+        if (dy < 0) player.direction = 'up';
+        else if (dy > 0) player.direction = 'down';
+        else if (dx < 0) player.direction = 'left';
+        else if (dx > 0) player.direction = 'right';
 
         if (dx !== 0 && dy !== 0) {
           dx *= 0.707;
@@ -1282,10 +1515,12 @@
 
               // Animate the bat swing
               obs.animTimer = (obs.animTimer || 0) + 1;
-              if (obs.animTimer % 30 < 15) {
-                obs.sprite = sprLeah1;
+
+              // Update direction based on velocity
+              if (Math.abs(obs.dy) > Math.abs(obs.dx)) {
+                obs.direction = obs.dy > 0 ? 'down' : 'up';
               } else {
-                obs.sprite = sprLeah2;
+                obs.direction = obs.dx > 0 ? 'right' : 'left';
               }
 
               // Boss Dialog Logic
@@ -1309,6 +1544,13 @@
                 obs.dx = Math.cos(angle) * obs.speed;
                 obs.dy = Math.sin(angle) * obs.speed;
                 obs.timer = Math.floor(Math.random() * 60) + 30; // 0.5 to 1.5 secs
+
+                // Update direction based on velocity
+                if (Math.abs(obs.dy) > Math.abs(obs.dx)) {
+                  obs.direction = obs.dy > 0 ? 'down' : 'up';
+                } else {
+                  obs.direction = obs.dx > 0 ? 'right' : 'left';
+                }
               }
             }
 
@@ -1359,6 +1601,7 @@
                   // Respawn player at the start of the current room without resetting the room
                   player.x = levels[currentLevel].startX;
                   player.y = levels[currentLevel].startY;
+                  player.direction = 'down';
                   player.isHit = false;
                   player.invincible = true;
                   player.invincibleTimer = 120; // 2 seconds of invincibility
@@ -1406,8 +1649,9 @@
             dx: 0,
             dy: 0,
             speed: 0.7,
-            sprite: sprLeah1,
+            sprite: sprLeahDown1,
             animTimer: 0,
+            direction: 'down',
             type: 'boss_chase',
             timer: 0,
             minX: 20,
@@ -1448,16 +1692,17 @@
             startDialog([
               {
                 name: 'Jacky',
-                text: 'Got them all! I need to head to the exit door at the top!',
+                text: 'Got them all! I need to head to the exit door!',
               },
             ]);
           }
         }
 
         if (player.exitActive) {
+          let ex = levels[currentLevel].exit;
           let doorBox = {
-            x: 276,
-            y: 0,
+            x: ex.x,
+            y: ex.y,
             size: 48,
             hitbox: { xOffset: 0, yOffset: 0, w: 48, h: 48 },
           };
@@ -1469,12 +1714,12 @@
         }
 
         if (currentLevel === 3) {
-          // Trigger box area around the friends group
+          // Trigger box strictly localized right around the friends group
           const friendTriggerBox = {
-            x: 300,
-            y: 100,
-            size: 200,
-            hitbox: { xOffset: 0, yOffset: 0, w: 250, h: 200 },
+            x: 380,
+            y: 110,
+            size: 100,
+            hitbox: { xOffset: 0, yOffset: 0, w: 120, h: 200 },
           };
 
           if (checkCollision(player, friendTriggerBox)) {
@@ -1560,8 +1805,39 @@
             if (obs.opacity !== undefined)
               ctx.globalAlpha = Math.max(0, obs.opacity);
 
-            let flipObstacle = obs.dx < 0;
-            drawSprite(obs.sprite, obs.x, obs.y, obs.size, flipObstacle);
+            let flipObstacle = false;
+            let currentSpr = obs.sprite;
+
+            // BOSS LEAH DIRECTIONAL DRAWING
+            if (obs.type === 'boss_chase') {
+              let isFrame2 = obs.animTimer % 30 >= 15;
+              if (obs.direction === 'up')
+                currentSpr = isFrame2 ? sprLeahUp2 : sprLeahUp1;
+              else if (obs.direction === 'left') {
+                currentSpr = isFrame2 ? sprLeahSide2 : sprLeahSide1;
+                flipObstacle = true;
+              } else if (obs.direction === 'right') {
+                currentSpr = isFrame2 ? sprLeahSide2 : sprLeahSide1;
+                flipObstacle = false;
+              } else currentSpr = isFrame2 ? sprLeahDown2 : sprLeahDown1;
+            }
+            // BARISTA DIRECTIONAL DRAWING
+            else if (
+              obs.sprite === sprBaristaDown ||
+              obs.sprite === sprBaristaUp ||
+              obs.sprite === sprBaristaSide
+            ) {
+              if (obs.direction === 'up') currentSpr = sprBaristaUp;
+              else if (obs.direction === 'left') {
+                currentSpr = sprBaristaSide;
+                flipObstacle = true;
+              } else if (obs.direction === 'right') {
+                currentSpr = sprBaristaSide;
+                flipObstacle = false;
+              } else currentSpr = sprBaristaDown;
+            }
+
+            drawSprite(currentSpr, obs.x, obs.y, obs.size, flipObstacle);
 
             // Draw Boss Dialog Bubble
             if (obs.type === 'boss_chase' && obs.currentBossText) {
@@ -1603,22 +1879,35 @@
           }
         }
 
-        // Draw Player (with invincibility blinking)
+        // Draw Player (with direction tracking and invincibility blinking)
         if (!player.invincible || Math.floor(Date.now() / 150) % 2 === 0) {
-          drawSprite(
-            player.sprite,
-            player.x,
-            player.y,
-            player.size,
-            !player.facingRight,
-          );
+          let currentSpr = sprJackyDown;
+          let flip = false;
+          if (player.direction === 'up') currentSpr = sprJackyUp;
+          else if (player.direction === 'left') {
+            currentSpr = sprJackySide;
+            flip = true;
+          } else if (player.direction === 'right') {
+            currentSpr = sprJackySide;
+            flip = false;
+          }
+
+          drawSprite(currentSpr, player.x, player.y, player.size, flip);
         }
 
         // Draw Exit Door & Arrow
         if (player.exitActive && currentLevel < 3) {
-          drawSprite(sprDoor, 276, 0, 48);
+          let ex = levels[currentLevel].exit;
+          drawSprite(sprDoor, ex.x, ex.y, 48);
+
           if (Math.floor(Date.now() / 300) % 2 === 0) {
-            drawSprite(sprArrow, 276, 48, 48);
+            if (ex.type === 'right') {
+              drawSpriteRotated(sprArrow, ex.x - 48, ex.y, 48, Math.PI / 2);
+            } else if (ex.type === 'bottom') {
+              drawSpriteRotated(sprArrow, ex.x, ex.y - 48, 48, Math.PI);
+            } else {
+              drawSprite(sprArrow, ex.x, ex.y + 48, 48); // top
+            }
           }
         }
 
