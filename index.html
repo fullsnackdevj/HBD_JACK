@@ -200,6 +200,7 @@
       <div id="ui-bar" class="hidden">
         <span id="level-display">RM:1</span>
         <span id="bean-display">BEANS:0/24</span>
+        <span id="life-display">☕☕☕☕☕</span>
       </div>
 
       <canvas id="gameCanvas" width="600" height="400"></canvas>
@@ -223,8 +224,15 @@
       <div id="start-screen" class="overlay">
         <div class="pixel-panel">
           <h1 class="title-text">JACKY'S<br />COFFEE RUN</h1>
-          <p class="body-text">
-            Collect 24 coffee beans to find your surprise! Dodge the obstacles!
+          <p
+            class="body-text"
+            style="font-size: 12px; margin-bottom: 10px; color: #fde047">
+            HOW TO PLAY:
+          </p>
+          <p class="body-text" style="text-align: left; line-height: 1.5">
+            1. Help Jacky collect 24 beans.<br />2. Use D-Pad or Arrow Keys.<br />3.
+            Dodge carts, cups & baristas.<br />4. You have 5 Cups (Lives).<br />5.
+            Beware of the Boss!
           </p>
           <button id="start-btn" class="pixel-btn">START GAME</button>
         </div>
@@ -263,6 +271,21 @@
           </button>
         </div>
       </div>
+
+      <!-- Game Over Screen -->
+      <div id="game-over-screen" class="overlay hidden">
+        <div class="pixel-panel">
+          <h1 class="title-text" style="color: #ef4444">GAME OVER</h1>
+          <p class="body-text">You ran out of coffee cups!</p>
+          <button id="try-again-btn" class="pixel-btn">TRY AGAIN</button>
+          <button
+            id="game-over-exit-btn"
+            class="pixel-btn"
+            style="background-color: #991b1b; margin-left: 10px">
+            EXIT GAME
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -276,13 +299,18 @@
       const uiBar = document.getElementById('ui-bar');
       const beanDisplay = document.getElementById('bean-display');
       const levelDisplay = document.getElementById('level-display');
+      const lifeDisplay = document.getElementById('life-display');
       const dialogBox = document.getElementById('dialog-box');
       const dialogName = document.getElementById('dialog-name');
       const dialogText = document.getElementById('dialog-text');
+      const gameOverScreen = document.getElementById('game-over-screen');
 
-      let gameState = 'START'; // START, PLAYING, DIALOG, TRANSITION, WIN
+      let gameState = 'START'; // START, PLAYING, DIALOG, TRANSITION, WIN, GAMEOVER
       let currentLevel = 0;
       let totalBeansCollected = 0;
+      let bossSpawned = false;
+      let screenShake = 0;
+      let lives = 5;
       const keys = {
         w: false,
         a: false,
@@ -353,8 +381,8 @@
         5: '#ffffff', // White
         6: '#d4af37', // Blonde hair
         7: '#8c593b', // Bean dark / wood
-        8: '#aaaaaa', // Gray Cart
-        9: '#ff6699', // Pink shirt (Jacky)
+        8: '#aaaaaa', // Gray Cart / Bat
+        9: '#ff6699', // Pink clothes
         a: '#87ceeb', // Glasses frame (Light Blue)
         b: '#333333', // Husband suit (Dark Gray)
         c: '#ff9900', // Candle flame
@@ -362,20 +390,51 @@
         '.': 'transparent',
       };
 
-      // Jacky Sprite Updated: Longer hair & prominent glasses
+      // Jacky Sprite
       const sprJacky = [
         '............',
         '...000000...',
         '..02222220..',
         '.0221111220.',
-        '.0aa1111aa0.', // Larger, brighter glasses
+        '.0aa1111aa0.',
         '.0a111111a0.',
         '.0222222220.',
-        '.0209999020.', // Hair overlapping the shirt
+        '.0209999020.',
         '.0209999020.',
         '..02444420..',
         '...040040...',
         '...00..00...',
+      ];
+
+      // BOSS GWEN Sprites (Bigger, Pink clothes, Swinging Bat Animation)
+      const sprGwen1 = [
+        '...000000.8.',
+        '..022222208.',
+        '.02211112208',
+        '.02211112208',
+        '.02099990208', // Bat held up
+        '.02099990008',
+        '..009999000.',
+        '.0109999080.',
+        '.0009999000.',
+        '...044440...',
+        '...00..00...',
+        '............',
+      ];
+
+      const sprGwen2 = [
+        '...000000...',
+        '..02222220..',
+        '.0221111220.',
+        '.0221111220.',
+        '.0209999020.',
+        '.0209999000.',
+        '..009999000.',
+        '.0109999000.',
+        '.00099990888', // Bat swinging out horizontally
+        '...044440...',
+        '...00..00...',
+        '............',
       ];
 
       const sprBean = [
@@ -513,6 +572,51 @@
         '............',
       ];
 
+      const sprChair = [
+        '............',
+        '...000000...',
+        '...077770...',
+        '...077770...',
+        '...000000...',
+        '....0..0....',
+        '....0..0....',
+        '............',
+        '............',
+        '............',
+        '............',
+        '............',
+      ];
+
+      const sprDoor = [
+        '............',
+        '..00000000..',
+        '.0777777770.',
+        '.0777777770.',
+        '.0777777770.',
+        '.0777777770.',
+        '.0777777770.',
+        '.0777777770.',
+        '.0777777670.',
+        '.0777777770.',
+        '.0777777770.',
+        '............',
+      ];
+
+      const sprArrow = [
+        '............',
+        '.....00.....',
+        '....0550....',
+        '...055550...',
+        '..05555550..',
+        '.0555555550.',
+        '..00055000..',
+        '....0550....',
+        '....0550....',
+        '....0550....',
+        '....0000....',
+        '............',
+      ];
+
       function drawSprite(spriteArray, x, y, size, flipX = false) {
         const pixelSize = size / 12; // 12x12 grid
         for (let row = 0; row < 12; row++) {
@@ -542,6 +646,10 @@
         sprite: sprJacky,
         facingRight: true,
         hitbox: { xOffset: 12, yOffset: 16, w: 24, h: 24 },
+        isHit: false,
+        exitActive: false,
+        invincible: false,
+        invincibleTimer: 0,
       };
 
       let beans = [];
@@ -580,10 +688,14 @@
               y: 50,
               size: 48,
               dx: 0,
-              dy: 3,
+              dy: 0,
+              speed: 1.2,
               sprite: sprCart,
-              type: 'bounceY',
-              minY: 50,
+              type: 'random',
+              timer: 0,
+              minX: 20,
+              maxX: 550,
+              minY: 20,
               maxY: 350,
               hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
             },
@@ -592,10 +704,14 @@
               y: 350,
               size: 48,
               dx: 0,
-              dy: -3,
+              dy: 0,
+              speed: 1.2,
               sprite: sprCart,
-              type: 'bounceY',
-              minY: 50,
+              type: 'random',
+              timer: 0,
+              minX: 20,
+              maxX: 550,
+              minY: 20,
               maxY: 350,
               hitbox: { xOffset: 8, yOffset: 8, w: 32, h: 32 },
             },
@@ -605,6 +721,10 @@
             { x: 530, y: 20, size: 48, sprite: sprPlant },
             { x: 20, y: 330, size: 48, sprite: sprPlant },
             { x: 530, y: 330, size: 48, sprite: sprPlant },
+            { x: 150, y: 200, size: 48, sprite: sprTable },
+            { x: 110, y: 200, size: 48, sprite: sprChair },
+            { x: 450, y: 200, size: 48, sprite: sprTable },
+            { x: 490, y: 200, size: 48, sprite: sprChair },
           ],
           friends: [],
         },
@@ -637,32 +757,42 @@
               x: 100,
               y: 150,
               size: 48,
-              dx: 4,
+              dx: 0,
               dy: 0,
+              speed: 1.5,
               sprite: sprCup,
-              type: 'bounceX',
-              minX: 100,
+              type: 'random',
+              timer: 0,
+              minX: 50,
               maxX: 500,
+              minY: 50,
+              maxY: 350,
               hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
             },
             {
               x: 500,
               y: 250,
               size: 48,
-              dx: -4,
+              dx: 0,
               dy: 0,
+              speed: 1.5,
               sprite: sprCup,
-              type: 'bounceX',
-              minX: 100,
+              type: 'random',
+              timer: 0,
+              minX: 50,
               maxX: 500,
+              minY: 50,
+              maxY: 350,
               hitbox: { xOffset: 12, yOffset: 12, w: 24, h: 24 },
             },
           ],
           scenery: [
-            { x: 150, y: 200, size: 48, sprite: sprTable },
-            { x: 350, y: 200, size: 48, sprite: sprTable },
-            { x: 250, y: 80, size: 48, sprite: sprPlant },
-            { x: 250, y: 300, size: 48, sprite: sprPlant },
+            { x: 250, y: 150, size: 48, sprite: sprTable },
+            { x: 250, y: 110, size: 48, sprite: sprChair },
+            { x: 250, y: 250, size: 48, sprite: sprTable },
+            { x: 250, y: 290, size: 48, sprite: sprChair },
+            { x: 450, y: 80, size: 48, sprite: sprPlant },
+            { x: 150, y: 300, size: 48, sprite: sprPlant },
           ],
           friends: [],
         },
@@ -691,7 +821,6 @@
             { x: 450, y: 300 },
           ],
           obstacles: [
-            // Randomly wandering enemies (slower)
             {
               x: 150,
               y: 100,
@@ -740,7 +869,6 @@
               maxY: 350,
               hitbox: { xOffset: 12, yOffset: 8, w: 24, h: 36 },
             },
-            // Static Counter (Acts as an obstacle block)
             {
               x: 150,
               y: 170,
@@ -754,6 +882,8 @@
           scenery: [
             { x: 30, y: 20, size: 48, sprite: sprPlant },
             { x: 520, y: 320, size: 48, sprite: sprPlant },
+            { x: 300, y: 40, size: 48, sprite: sprTable },
+            { x: 300, y: 0, size: 48, sprite: sprChair },
           ],
           friends: [],
         },
@@ -775,7 +905,13 @@
           ],
           friends: [
             { name: 'Jose', x: 450, y: 200, size: 48, sprite: sprHusband },
-            { name: 'DJ', x: 400, y: 130, size: 48, sprite: sprFriend1 },
+            {
+              name: 'Don Joseph',
+              x: 400,
+              y: 130,
+              size: 48,
+              sprite: sprFriend1,
+            },
             { name: 'Jay', x: 400, y: 270, size: 48, sprite: sprFriend2 },
           ],
         },
@@ -785,6 +921,11 @@
         const lvl = levels[levelIndex];
         player.x = lvl.startX;
         player.y = lvl.startY;
+        player.isHit = false;
+        player.exitActive = false;
+        player.invincible = false;
+        player.invincibleTimer = 0;
+        bossSpawned = false;
 
         beans = lvl.beans.map((b) => ({
           ...b,
@@ -793,7 +934,20 @@
           hitbox: { xOffset: 0, yOffset: 0, w: 24, h: 24 },
         }));
         obstacles = lvl.obstacles.map((o) => ({ ...o }));
-        scenery = lvl.scenery ? lvl.scenery.map((s) => ({ ...s })) : [];
+
+        // Add hitboxes to scenery for collision blocking
+        scenery = lvl.scenery
+          ? lvl.scenery.map((s) => ({
+              ...s,
+              hitbox: {
+                xOffset: 6,
+                yOffset: 12,
+                w: s.size - 12,
+                h: s.size - 18,
+              }, // slightly smaller hitbox allows walking "behind" plants/tables
+            }))
+          : [];
+
         friends = lvl.friends.map((f) => ({
           ...f,
           hitbox: { xOffset: 0, yOffset: 0, w: 48, h: 48 },
@@ -810,6 +964,7 @@
 
       function updateUI() {
         beanDisplay.innerText = `BEANS:${totalBeansCollected}/24`;
+        lifeDisplay.innerText = '☕'.repeat(lives > 0 ? lives : 0);
       }
 
       // Input Handling
@@ -858,6 +1013,8 @@
         uiBar.classList.remove('hidden');
         currentLevel = 0;
         totalBeansCollected = 0;
+        lives = 5;
+        bossSpawned = false;
         loadLevel(currentLevel);
         gameLoop();
       });
@@ -871,9 +1028,25 @@
         });
 
       document.getElementById('exit-btn').addEventListener('click', () => {
-        // Exit game (reloads page to simulate closing/restarting)
         window.location.reload();
       });
+
+      document.getElementById('try-again-btn').addEventListener('click', () => {
+        gameOverScreen.classList.add('hidden');
+        uiBar.classList.remove('hidden');
+        currentLevel = 0;
+        totalBeansCollected = 0;
+        lives = 5;
+        bossSpawned = false;
+        loadLevel(currentLevel);
+        gameState = 'PLAYING';
+      });
+
+      document
+        .getElementById('game-over-exit-btn')
+        .addEventListener('click', () => {
+          window.location.reload();
+        });
 
       // Precise Box Collision using Hitboxes
       function checkCollision(obj1, obj2) {
@@ -900,6 +1073,13 @@
       function update() {
         if (gameState !== 'PLAYING') return;
 
+        if (player.invincible) {
+          player.invincibleTimer--;
+          if (player.invincibleTimer <= 0) {
+            player.invincible = false;
+          }
+        }
+
         let dx = 0,
           dy = 0;
         if (keys.w || keys.ArrowUp) dy -= player.speed;
@@ -918,69 +1098,132 @@
           dy *= 0.707;
         }
 
-        let newPlayer = { ...player, x: player.x + dx, y: player.y + dy };
+        let nextX = player.x + dx;
+        let nextY = player.y + dy;
 
         // Keep inside bounds
-        if (newPlayer.x < 0) newPlayer.x = 0;
-        if (newPlayer.y < 0) newPlayer.y = 0;
-        if (newPlayer.x + newPlayer.size > canvas.width)
-          newPlayer.x = canvas.width - newPlayer.size;
-        if (newPlayer.y + newPlayer.size > canvas.height)
-          newPlayer.y = canvas.height - newPlayer.size;
+        if (nextX < 0) nextX = 0;
+        if (nextY < 0) nextY = 0;
+        if (nextX + player.size > canvas.width)
+          nextX = canvas.width - player.size;
+        if (nextY + player.size > canvas.height)
+          nextY = canvas.height - player.size;
 
-        // Apply movement
-        player.x = newPlayer.x;
-        player.y = newPlayer.y;
+        // Scenery & Static Counter Collision (Solid objects)
+        let hitX = false,
+          hitY = false;
+        const solids = [
+          ...obstacles.filter((o) => o.type === 'static_counter'),
+          ...scenery,
+        ];
+
+        for (let s of solids) {
+          if (checkCollision({ ...player, x: nextX }, s)) hitX = true;
+          if (checkCollision({ ...player, y: nextY }, s)) hitY = true;
+        }
+
+        if (!hitX) player.x = nextX;
+        if (!hitY) player.y = nextY;
 
         for (let obs of obstacles) {
-          if (obs.type === 'static_counter') {
-            // If hitting a static object, push player back out
-            if (checkCollision(player, obs)) {
-              player.x -= dx;
-              player.y -= dy;
-            }
-            continue;
-          }
+          if (obs.type === 'static_counter') continue;
 
-          if (obs.type === 'random') {
-            // Random Wander Logic
-            obs.timer--;
-            if (obs.timer <= 0) {
-              const angle = Math.random() * Math.PI * 2;
+          if (obs.type === 'random' || obs.type === 'boss_chase') {
+            if (obs.type === 'boss_chase') {
+              // Boss chases the player
+              let angle = Math.atan2(player.y - obs.y, player.x - obs.x);
               obs.dx = Math.cos(angle) * obs.speed;
               obs.dy = Math.sin(angle) * obs.speed;
-              obs.timer = Math.floor(Math.random() * 60) + 30; // 0.5 to 1.5 secs
+
+              // Animate the bat swing
+              obs.animTimer = (obs.animTimer || 0) + 1;
+              if (obs.animTimer % 30 < 15) {
+                obs.sprite = sprGwen1;
+              } else {
+                obs.sprite = sprGwen2;
+              }
+
+              // Boss Dialog Logic
+              obs.bossTextTimer = (obs.bossTextTimer || 0) - 1;
+              if (obs.bossTextTimer <= 0) {
+                const phrases = [
+                  ['wala pa akong tulog,', 'halika dito maam jaack!'],
+                  ['nag iisip pa ako ng', 'mga gagawin sa', 'camp raaawrr!'],
+                  ['halika dito!'],
+                ];
+                obs.currentBossText =
+                  phrases[Math.floor(Math.random() * phrases.length)];
+                obs.bossTextTimer = 180; // Show a new phrase roughly every 3 seconds
+              }
+            } else {
+              // Random Wander Logic
+              obs.timer--;
+              if (obs.timer <= 0) {
+                const angle = Math.random() * Math.PI * 2;
+                obs.dx = Math.cos(angle) * obs.speed;
+                obs.dy = Math.sin(angle) * obs.speed;
+                obs.timer = Math.floor(Math.random() * 60) + 30; // 0.5 to 1.5 secs
+              }
             }
+
             obs.x += obs.dx;
             obs.y += obs.dy;
 
-            // Keep random enemies in bounds
+            // Keep enemies in bounds
             if (obs.x <= obs.minX || obs.x + obs.size >= obs.maxX) obs.dx *= -1;
             if (obs.y <= obs.minY || obs.y + obs.size >= obs.maxY) obs.dy *= -1;
-          } else {
-            // Normal bounce logic
-            obs.x += obs.dx;
-            obs.y += obs.dy;
-            if (obs.type === 'bounceY') {
-              if (obs.y <= obs.minY || obs.y + obs.size >= obs.maxY)
-                obs.dy *= -1;
-            } else if (obs.type === 'bounceX') {
-              if (obs.x <= obs.minX || obs.x + obs.size >= obs.maxX)
-                obs.dx *= -1;
-            }
           }
 
           // Hit by moving obstacle
-          if (checkCollision(player, obs)) {
-            const levelBeans = levels[currentLevel].beans.length;
-            const uncollected = beans.filter((b) => !b.collected).length;
-            totalBeansCollected -= levelBeans - uncollected;
-            loadLevel(currentLevel);
-            return;
+          if (
+            checkCollision(player, obs) &&
+            !player.isHit &&
+            !player.invincible
+          ) {
+            player.isHit = true;
+            lives--;
+            updateUI();
+
+            if (lives <= 0) {
+              startDialog(
+                [
+                  {
+                    name: 'Jacky',
+                    text: 'Oh no! I lost all my coffee cups...',
+                  },
+                ],
+                () => {
+                  gameState = 'GAMEOVER';
+                  uiBar.classList.add('hidden');
+                  gameOverScreen.classList.remove('hidden');
+                },
+              );
+            } else {
+              // Main Character "Ouch!" Dialog
+              startDialog(
+                [
+                  {
+                    name: 'Jacky',
+                    text: `Ouch! I lost a cup! (${lives} left)`,
+                  },
+                ],
+                () => {
+                  // Respawn player at the start of the current room without resetting the room
+                  player.x = levels[currentLevel].startX;
+                  player.y = levels[currentLevel].startY;
+                  player.isHit = false;
+                  player.invincible = true;
+                  player.invincibleTimer = 120; // 2 seconds of invincibility
+                },
+              );
+            }
+            return; // Stop updating frame
           }
         }
 
         let levelComplete = true;
+        let uncollectedCount = 0;
+
         for (let bean of beans) {
           if (!bean.collected) {
             if (checkCollision(player, bean)) {
@@ -989,13 +1232,71 @@
               updateUI();
             } else {
               levelComplete = false;
+              uncollectedCount++;
             }
           }
         }
 
+        // BOSS GWEN Trigger (Room 3, exactly 3 beans left uncollected)
+        if (currentLevel === 2 && uncollectedCount === 3 && !bossSpawned) {
+          bossSpawned = true;
+          // Remove other wandering enemies
+          obstacles = obstacles.filter((o) => o.type === 'static_counter');
+          // Spawn Boss Gwen (slower speed, with animation timer)
+          obstacles.push({
+            x: 250,
+            y: 50,
+            size: 72,
+            dx: 0,
+            dy: 0,
+            speed: 0.7,
+            sprite: sprGwen1,
+            animTimer: 0,
+            type: 'boss_chase',
+            timer: 0,
+            minX: 20,
+            maxX: 550,
+            minY: 20,
+            maxY: 350,
+            hitbox: { xOffset: 16, yOffset: 16, w: 40, h: 40 },
+            bossTextTimer: 0,
+          });
+          // Trigger earthquake screen shake
+          screenShake = 25;
+          // Show Boss Warning
+          startDialog([
+            {
+              name: 'WARNING',
+              text: 'warning! BOSS GWEN is Here! galit yan kasi wala pang tulog be careful maam Jack!',
+            },
+          ]);
+          return;
+        }
+
         if (levelComplete && beans.length > 0 && currentLevel < 3) {
-          gameState = 'TRANSITION';
-          transitionScreen.classList.remove('hidden');
+          if (!player.exitActive) {
+            player.exitActive = true;
+            startDialog([
+              {
+                name: 'Jacky',
+                text: 'Got them all! I need to head to the exit door at the top!',
+              },
+            ]);
+          }
+        }
+
+        if (player.exitActive) {
+          let doorBox = {
+            x: 276,
+            y: 0,
+            size: 48,
+            hitbox: { xOffset: 0, yOffset: 0, w: 48, h: 48 },
+          };
+          if (checkCollision(player, doorBox)) {
+            player.exitActive = false;
+            gameState = 'TRANSITION';
+            transitionScreen.classList.remove('hidden');
+          }
         }
 
         if (currentLevel === 3) {
@@ -1013,15 +1314,15 @@
               [
                 {
                   name: 'Jose (Husband)',
-                  text: 'Surprise, honey! Happy Birthday!',
+                  text: 'Surprise, Love! Happy Birthday!',
                 },
                 {
-                  name: 'DJ',
-                  text: 'We collected all these coffee beans to celebrate your special day!',
+                  name: 'Don Joseph',
+                  text: 'sorry ate jack natagalan ako kanina.. nag gawa kasi ako kanina ng pang paninda ko.. bili na din kayo , oreo float, mango float at banana yema! murang mura!',
                 },
                 {
                   name: 'Jay',
-                  text: "Let's party! We hope you love the surprise!",
+                  text: 'hello maam jack ginawa ko to kanina habang nag ccooffee tayo.',
                 },
               ],
               () => {
@@ -1038,6 +1339,18 @@
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Apply screen shake (earthquake effect)
+        let isShaking = false;
+        if (screenShake > 0) {
+          isShaking = true;
+          ctx.save();
+          let dx = (Math.random() - 0.5) * screenShake;
+          let dy = (Math.random() - 0.5) * screenShake;
+          ctx.translate(dx, dy);
+          screenShake *= 0.92; // gradual decay of earthquake
+          if (screenShake < 0.5) screenShake = 0;
+        }
+
         // Draw Wood Floor Pattern
         ctx.fillStyle = '#2b1d14';
         for (let i = 0; i < canvas.width; i += 48) {
@@ -1047,20 +1360,19 @@
           ctx.fillRect(0, i, canvas.width, 2);
         }
 
-        // Draw Scenery (Plants, Tables)
+        // Draw Scenery (Plants, Tables, Chairs)
         for (let s of scenery) {
           drawSprite(s.sprite, s.x, s.y, s.size);
         }
 
-        // Draw Static Objects (Like the long counter in Room 3)
+        // Draw Static Objects
         for (let obs of obstacles) {
           if (obs.type === 'static_counter') {
-            ctx.fillStyle = '#8B4513'; // Wood color
+            ctx.fillStyle = '#8B4513';
             ctx.fillRect(obs.x, obs.y, obs.hitbox.w, obs.hitbox.h);
             ctx.strokeStyle = '#3e1f08';
             ctx.lineWidth = 4;
             ctx.strokeRect(obs.x, obs.y, obs.hitbox.w, obs.hitbox.h);
-            // Draw some lines on the counter to make it look like planks
             ctx.fillStyle = '#6b340e';
             for (let i = obs.x + 20; i < obs.x + obs.hitbox.w; i += 40) {
               ctx.fillRect(i, obs.y, 2, obs.hitbox.h);
@@ -1077,17 +1389,68 @@
           if (obs.type !== 'static_counter') {
             let flipObstacle = obs.dx < 0;
             drawSprite(obs.sprite, obs.x, obs.y, obs.size, flipObstacle);
+
+            // Draw Boss Dialog Bubble
+            if (obs.type === 'boss_chase' && obs.currentBossText) {
+              ctx.fillStyle = 'white';
+              ctx.strokeStyle = '#000';
+              ctx.lineWidth = 2;
+              ctx.font = '8px "Press Start 2P"';
+              ctx.textAlign = 'center';
+
+              let bubbleWidth = 200;
+              let bubbleHeight = obs.currentBossText.length * 12 + 10;
+              let bubbleX = obs.x + obs.size / 2 - bubbleWidth / 2;
+              let bubbleY = obs.y - bubbleHeight - 10;
+
+              // Draw Background
+              ctx.fillRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+              ctx.strokeRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+
+              // Draw Tail
+              ctx.beginPath();
+              ctx.moveTo(obs.x + obs.size / 2 - 5, bubbleY + bubbleHeight);
+              ctx.lineTo(obs.x + obs.size / 2, bubbleY + bubbleHeight + 10);
+              ctx.lineTo(obs.x + obs.size / 2 + 5, bubbleY + bubbleHeight);
+              ctx.fill();
+              ctx.stroke();
+              ctx.closePath();
+
+              // Draw Text
+              ctx.fillStyle = '#000';
+              for (let i = 0; i < obs.currentBossText.length; i++) {
+                ctx.fillText(
+                  obs.currentBossText[i],
+                  obs.x + obs.size / 2,
+                  bubbleY + 14 + i * 12,
+                );
+              }
+            }
           }
         }
 
-        // Draw Player
-        drawSprite(
-          player.sprite,
-          player.x,
-          player.y,
-          player.size,
-          !player.facingRight,
-        );
+        // Draw Player (with invincibility blinking)
+        if (!player.invincible || Math.floor(Date.now() / 150) % 2 === 0) {
+          drawSprite(
+            player.sprite,
+            player.x,
+            player.y,
+            player.size,
+            !player.facingRight,
+          );
+        }
+
+        // Draw Exit Door & Arrow
+        if (player.exitActive && currentLevel < 3) {
+          drawSprite(sprDoor, 276, 0, 48);
+          if (Math.floor(Date.now() / 300) % 2 === 0) {
+            drawSprite(sprArrow, 276, 48, 48);
+          }
+        }
+
+        if (isShaking) {
+          ctx.restore();
+        }
       }
 
       function gameLoop() {
